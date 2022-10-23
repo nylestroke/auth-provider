@@ -1,0 +1,34 @@
+@import './../../shared/styles/variables';
+
+.error-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  font-family: $font-family;
+  color: $text-color;
+  background: $background-color;
+  text-align: center;
+
+  div:first-child {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+
+    font-size: 2rem;
+    gap: 20px;
+
+    span:first-child {
+      font-weight: 500;
+    }
+
+    .vertical-spacer {
+      height: 40px;
+      width: 2px;
+      background: $border-color;
+    }
+  }
+}

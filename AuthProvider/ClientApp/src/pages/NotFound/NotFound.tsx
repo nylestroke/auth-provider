@@ -2,13 +2,15 @@
 import './NotFound.scss';
 
 const NotFoundPage = () => {
-  return (
-    <div className={'container'}>
-      <div className={'error'}>
-        <h2>test</h2>
-      </div>
-    </div>
-  );
+    return (
+        <div className="error-container">
+            <div>
+                <span>404</span>
+                <div className="vertical-spacer"></div>
+                <span>Page Not Found</span>
+            </div>
+        </div>
+    );
 };
 
 export default NotFoundPage;
