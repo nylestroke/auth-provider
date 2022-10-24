@@ -1,4 +1,7 @@
-﻿$font-family: 'Stolzl', sans-serif;
+﻿@import './../../shared/styles/fonts';
+
+$font-family: 'Stolzl', sans-serif;
+$font-family-second: 'VoxRoundWide', sans-serif;
 $text-color: #eee; 
 $border-color: #c9c9c9; 
 $background-color: #000;
