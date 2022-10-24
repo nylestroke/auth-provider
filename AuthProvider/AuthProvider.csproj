@@ -26,9 +26,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="ClientApp\src\assets\img" />
-      <Folder Include="ClientApp\src\components\Footer" />
-      <Folder Include="ClientApp\src\components\Navbar" />
       <Folder Include="ClientApp\src\pages\ChangePassword" />
     </ItemGroup>
 
