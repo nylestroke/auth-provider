@@ -1,5 +1,6 @@
 ﻿import React, {useState} from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
+import axios from '../../axios';
 import './Form.scss';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -8,6 +9,21 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 const LoginPage = () => {
     const [visibility, setVisibility] = useState<boolean>(false);
     const navigate = useNavigate();
+    const query = window.location.search;
+    
+    const onSubmit = () => {
+        axios.get("http://localhost:44405/oauth2/authorize" + query).then((data) => {
+            if (data.status === 200) {
+                axios.post("http://localhost:44405/oauth2/authorize" + query).then((res) => {
+                    if(res.data && res.status === 200) {
+                        window.location.assign(res.data);
+                    }
+                });
+            }
+        }).catch((err) => {
+            console.log(err);
+        })
+    };
 
     return (
         <div className="container">
@@ -31,7 +47,7 @@ const LoginPage = () => {
                             </button>
                         </div>
                         <div className="button_block">
-                            <button type="submit">Sign in</button>
+                            <button type="button" onClick={onSubmit}>Sign in</button>
                         </div>
                         <div className="button_block secondary">
                             <button type="button" onClick={() => navigate("/authorize/register")}>Register account</button>

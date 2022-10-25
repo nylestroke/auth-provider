@@ -53,7 +53,7 @@ namespace AuthProvider.Controllers
             query.Add("code", code);
             query.Add("state", state);
 
-            return Redirect($"{redirect_uri}{query.ToString()}");
+            return Ok($"{redirect_uri}{query.ToString()}");
         }
 
         public async Task<IActionResult> Token(
