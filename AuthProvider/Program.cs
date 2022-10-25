@@ -1,11 +1,16 @@
 using System.Text;
+using AuthProvider.Models;
+using AuthProvider.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.Configure<UsersDatabaseSettings>(builder.Configuration.GetSection("Database"));
+
+builder.Services.AddSingleton<UserService>();
 
 var issuer = builder.Configuration.GetSection("Configuration")["Issuer"];
 var secret = builder.Configuration.GetSection("Configuration")["Secret"];

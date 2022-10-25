@@ -4,22 +4,61 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AuthProvider.Models;
+using AuthProvider.Services;
 using Microsoft.AspNetCore.Authorization;
+using BC = BCrypt.Net.BCrypt;
 
 namespace AuthProvider.Controllers
 {
+    [ApiController]
     [AllowAnonymous]
-    public class OAuth2Controller : Controller
+    [Route("api/[controller]")]
+    public class OAuth2Controller : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly string secret;
-        private readonly string issuer;
-
-        public OAuth2Controller(IConfiguration configuration)
+        private readonly string _secret;
+        private readonly string _issuer;
+        private readonly UserService _usersService;
+        
+        public OAuth2Controller(IConfiguration configuration, UserService userService)
         {
             _configuration = configuration;
-            secret = _configuration.GetSection("Configuration")["Secret"];
-            issuer = _configuration.GetSection("Configuration")["Issuer"];
+            _secret = _configuration.GetSection("Configuration")["Secret"];
+            _issuer = _configuration.GetSection("Configuration")["Issuer"];
+            _usersService = userService;
+        }
+        
+        [HttpGet("{id:length(24)}")]
+        public async Task<ActionResult<User>> GetUser(string id)
+        {
+            var user = await _usersService.GetAsync(id);
+            if (user is null) return NotFound();
+            return user;
+        }
+
+        [HttpPost("user/register")]
+        public async Task<IActionResult> RegUser(User user)
+        {
+            user.password = BC.HashPassword(user.password);
+            await _usersService.CreateAsync(user);
+            return CreatedAtAction(nameof(GetUser), new {id = user.id }, user);
+        }
+
+        [HttpPost("user/login")]
+        public async Task<IActionResult> PostUser(User user)
+        {
+            if (user.email == null && user.username == null)
+            {
+                return NotFound("Please enter email or username. User not found");
+            }
+            var userModel = await _usersService.GetUser(user.email, user.username);
+            var checkPassword = BC.Verify(user.password, userModel?.password);
+            if (checkPassword)
+            {
+                return Ok(userModel);
+            }
+            return Forbid();
         }
 
         [HttpGet]
@@ -69,15 +108,15 @@ namespace AuthProvider.Controllers
                 new Claim(".Authorization", "cookie"),
             };
             
-            var secretBytes = Encoding.UTF8.GetBytes(secret);
+            var secretBytes = Encoding.UTF8.GetBytes(_secret);
             var key = new SymmetricSecurityKey(secretBytes);
             var algorithm = SecurityAlgorithms.HmacSha256;
 
             var signingCredentials = new SigningCredentials(key, algorithm);
 
             var token = new JwtSecurityToken(
-                issuer,
-                issuer,
+                _issuer,
+                _issuer,
                 claims,
                 notBefore: DateTime.Now,
                 expires: DateTime.Now.AddDays(30),

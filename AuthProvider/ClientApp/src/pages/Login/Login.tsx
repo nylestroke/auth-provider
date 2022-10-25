@@ -12,17 +12,27 @@ const LoginPage = () => {
     const query = window.location.search;
     
     const onSubmit = () => {
-        axios.get("http://localhost:44405/oauth2/authorize" + query).then((data) => {
-            if (data.status === 200) {
-                axios.post("http://localhost:44405/oauth2/authorize" + query).then((res) => {
-                    if(res.data && res.status === 200) {
-                        window.location.assign(res.data);
-                    }
-                });
-            }
+        // axios.get("http://localhost:44405/oauth2/authorize" + query).then((data) => {
+        //     if (data.status === 200) {
+        //         axios.post("http://localhost:44405/oauth2/authorize" + query).then((res) => {
+        //             if(res.data && res.status === 200) {
+        //                 window.location.assign(res.data);
+        //             }
+        //         });
+        //     }
+        // }).catch((err) => {
+        //     console.log(err);
+        // })
+        const data = {
+            // username: "nylestroke2",
+            // email: null,
+            password: "test123",
+        }
+        axios.post("http://localhost:44405/api/oauth2/user/login", data).then((res) => {
+            console.log(res);
         }).catch((err) => {
             console.log(err);
-        })
+        });
     };
 
     return (
