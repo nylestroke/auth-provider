@@ -1,5 +1,6 @@
 ﻿import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {useForm} from 'react-hook-form';
 import axios from '../../axios';
 import './Form.scss';
 
@@ -10,29 +11,33 @@ const LoginPage = () => {
     const [visibility, setVisibility] = useState<boolean>(false);
     const navigate = useNavigate();
     const query = window.location.search;
-    
-    const onSubmit = () => {
-        // axios.get("http://localhost:44405/oauth2/authorize" + query).then((data) => {
-        //     if (data.status === 200) {
-        //         axios.post("http://localhost:44405/oauth2/authorize" + query).then((res) => {
-        //             if(res.data && res.status === 200) {
-        //                 window.location.assign(res.data);
-        //             }
-        //         });
-        //     }
-        // }).catch((err) => {
-        //     console.log(err);
-        // })
-        const data = {
-            // username: "nylestroke2",
-            // email: null,
-            password: "test123",
+
+    const {register, handleSubmit, formState: {errors: isValid},} = useForm({
+        defaultValues: {
+            login: "",
+            password: "",
+        },
+        mode: "onChange",
+    });
+
+    const onSubmit = async (values: any) => {
+        let data = {};
+        if (values.login && values.password) {
+
+            values.login.includes("@") ? data = {
+                email: values.login,
+                password: values.password,
+            } : data = {
+                username: values.login,
+                password: values.password
+            }
+
+            axios.post("http://localhost:44405/api/oauth2/user/login", data).then((res) => {
+                console.log(res);
+            }).catch((err) => {
+                console.log(err);
+            });
         }
-        axios.post("http://localhost:44405/api/oauth2/user/login", data).then((res) => {
-            console.log(res);
-        }).catch((err) => {
-            console.log(err);
-        });
     };
 
     return (
@@ -40,14 +45,29 @@ const LoginPage = () => {
             <div className="content">
                 <div className="form">
                     <div className="header">Sign in to your account</div>
-                    <form>
+                    <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="input_block">
-                            <input type="text" name="useremail" placeholder="Username or email"/>
+                            <input type="text" 
+                                   autoComplete="email" 
+                                   placeholder="Username or email" 
+                                   {...register('login', {
+                                       required: "Username or email required" })}
+                            />
                         </div>
                         <div className="input_block">
-                            <input type={visibility ? "text" : "password"} name="password" placeholder="Password"/>
+                            <input 
+                                type={visibility ? "text" : "password"} 
+                                placeholder="Password"
+                                {...register('password', {
+                                    required: "Password required",
+                                    minLength: {
+                                        value: 5,
+                                        message: "Password must be at least 5 characters",
+                                    },
+                                })}
+                            />
                             <button type="button" className="visibility" onMouseDown={() => setVisibility(true)}
-                            onMouseUp={() => setVisibility(false)}
+                                    onMouseUp={() => setVisibility(false)}
                             >
                                 {visibility ? (
                                     <VisibilityOffIcon/>
@@ -57,14 +77,15 @@ const LoginPage = () => {
                             </button>
                         </div>
                         <div className="button_block">
-                            <button type="button" onClick={onSubmit}>Sign in</button>
+                            <button type="submit" disabled={!isValid}>Sign in</button>
                         </div>
                         <div className="button_block secondary">
-                            <button type="button" onClick={() => navigate("/authorize/register")}>Register account</button>
+                            <button type="button" onClick={() => navigate("/authorize/register")}>Register account
+                            </button>
                         </div>
                         <div className="link_block">
                             <div>Forgot your password?
-                            <span onClick={() => navigate("/change-password")}>Change password</span>
+                                <span onClick={() => navigate("/change-password")}>Change password</span>
                             </div>
                         </div>
                     </form>

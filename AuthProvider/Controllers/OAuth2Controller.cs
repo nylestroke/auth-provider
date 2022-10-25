@@ -53,12 +53,16 @@ namespace AuthProvider.Controllers
                 return NotFound("Please enter email or username. User not found");
             }
             var userModel = await _usersService.GetUser(user.email, user.username);
-            var checkPassword = BC.Verify(user.password, userModel?.password);
-            if (checkPassword)
+            if (userModel == null)
             {
-                return Ok(userModel);
+                return NotFound("User not found with current credentials");
             }
-            return Forbid();
+            var checkPassword = BC.Verify(user.password, userModel?.password);
+            return checkPassword switch
+            {
+                true => Ok(userModel),
+                false => Conflict("Incorrect credentials")
+            };
         }
 
         [HttpGet]
@@ -81,7 +85,7 @@ namespace AuthProvider.Controllers
 
         [HttpPost]
         public IActionResult Authorize(
-            string username,
+            User user,
             string redirect_uri,
             string state
         )
