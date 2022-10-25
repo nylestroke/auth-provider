@@ -32,10 +32,16 @@ const LoginPage = () => {
                 password: values.password
             }
 
-            axios.post("http://localhost:44405/api/oauth2/user/login", data).then((res) => {
-                console.log(res);
-            }).catch((err) => {
-                console.log(err);
+            axios.post("/api/oauth2/user/login", data).then(data => {
+                axios.get("/api/oauth2" + query).then(res => {
+                    axios.post("/api/oauth2" + res.data).then(response => {
+                        // window.location.assign(response.data);
+                        console.log(response.data)
+                        // axios.get(`/api/oauth2${response.data}&user_id=${data.data.id}&email=${data.data.email}&username=${data.data.username}`).then(token => {
+                        //     console.log(token);
+                        // })
+                    });
+                })
             });
         }
     };
@@ -47,16 +53,17 @@ const LoginPage = () => {
                     <div className="header">Sign in to your account</div>
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="input_block">
-                            <input type="text" 
-                                   autoComplete="email" 
-                                   placeholder="Username or email" 
+                            <input type="text"
+                                   autoComplete="email"
+                                   placeholder="Username or email"
                                    {...register('login', {
-                                       required: "Username or email required" })}
+                                       required: "Username or email required"
+                                   })}
                             />
                         </div>
                         <div className="input_block">
-                            <input 
-                                type={visibility ? "text" : "password"} 
+                            <input
+                                type={visibility ? "text" : "password"}
                                 placeholder="Password"
                                 {...register('password', {
                                     required: "Password required",
@@ -80,7 +87,7 @@ const LoginPage = () => {
                             <button type="submit" disabled={!isValid}>Sign in</button>
                         </div>
                         <div className="button_block secondary">
-                            <button type="button" onClick={() => navigate("/authorize/register")}>Register account
+                            <button type="button" onClick={() => navigate("/authorize/register" + query)}>Register account
                             </button>
                         </div>
                         <div className="link_block">
