@@ -31,20 +31,29 @@ const LoginPage = () => {
                 username: values.login,
                 password: values.password
             }
+            
+            // axios.get("/api/oauth2/token").then(data => console.log(data));
 
             axios.post("/api/oauth2/user/login", data).then((res) => {
                 if (res.status === 200) {
                     axios.get("/api/oauth2" + query).then((resGet) => {
                         axios.post("/api/oauth2" + resGet.data).then((resPost) => {
-                            
+                            window.location.assign(resPost.data);
                         });
-                    }).catch((err) => {
-                        console.log(err);
                     });
                 }
-            }).catch((err) => {
-                console.log(err);
             });
+
+            // axios.post("/api/oauth2/token" + "?grant_type=authorization_code&code=authorized").then(token => {
+            //     const config = {
+            //         headers: {
+            //             "Authorization": `Bearer ${token.data.access_token}`,
+            //         }
+            //     }
+            //     axios.get("/api/oauth2/verify", config).then(data => {
+            //         console.log(data);
+            //     });
+            // });
         }
     };
 
@@ -89,7 +98,8 @@ const LoginPage = () => {
                             <button type="submit" disabled={!isValid}>Sign in</button>
                         </div>
                         <div className="button_block secondary">
-                            <button type="button" onClick={() => navigate("/authorize/register")}>Register account
+                            <button type="button" onClick={() => navigate("/authorize/register" + query)}>Register
+                                account
                             </button>
                         </div>
                         <div className="link_block">

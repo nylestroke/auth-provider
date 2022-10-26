@@ -20,7 +20,7 @@ namespace AuthProvider.Controllers
         private readonly string _secret;
         private readonly string _issuer;
         private readonly UserService _usersService;
-        
+
         public OAuth2Controller(IConfiguration configuration, UserService userService)
         {
             _configuration = configuration;
@@ -28,7 +28,7 @@ namespace AuthProvider.Controllers
             _issuer = _configuration.GetSection("Configuration")["Issuer"];
             _usersService = userService;
         }
-        
+
         [HttpGet("{id:length(24)}")]
         public async Task<ActionResult<User>> GetUser(string id)
         {
@@ -42,7 +42,7 @@ namespace AuthProvider.Controllers
         {
             user.password = BC.HashPassword(user.password);
             await _usersService.CreateAsync(user);
-            return CreatedAtAction(nameof(GetUser), new {id = user.id }, user);
+            return CreatedAtAction(nameof(GetUser), new { id = user.id }, user);
         }
 
         [HttpPost("user/login")]
@@ -52,11 +52,13 @@ namespace AuthProvider.Controllers
             {
                 return NotFound("Please enter email or username. User not found");
             }
+
             var userModel = await _usersService.GetUser(user.email, user.username);
             if (userModel == null)
             {
                 return NotFound("User not found with current credentials");
             }
+
             var checkPassword = BC.Verify(user.password, userModel?.password);
             return checkPassword switch
             {
@@ -80,7 +82,6 @@ namespace AuthProvider.Controllers
             query.Add("redirect_uri", redirect_uri);
             query.Add("state", state);
             // query.Add("scope", scope);
-
             return Ok(query.ToString());
         }
 
@@ -90,31 +91,27 @@ namespace AuthProvider.Controllers
             string state
         )
         {
-            var code = "authorized";
-            
             var query = new QueryBuilder();
-            query.Add("code", code);
+            query.Add("code", "authorized");
             query.Add("state", state);
 
             return Ok($"{redirect_uri}{query.ToString()}");
         }
 
+        [HttpPost("token")]
         public async Task<IActionResult> Token(
             string grant_type,
-            string code,
-            string redirect_uri,
-            string client_id
+            string code
         )
         {
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, "mainWeb"),
-                new Claim(".Authorization", "cookie"),
             };
-            
+
             var secretBytes = Encoding.UTF8.GetBytes(_secret);
             var key = new SymmetricSecurityKey(secretBytes);
-            var algorithm = SecurityAlgorithms.HmacSha256;
+            const string algorithm = SecurityAlgorithms.HmacSha256;
 
             var signingCredentials = new SigningCredentials(key, algorithm);
 
@@ -134,8 +131,25 @@ namespace AuthProvider.Controllers
                 token_type = "Bearer",
                 raw_claim = "oauthClient"
             };
-            
+
             return new OkObjectResult(responseObject);
+        }
+
+        [HttpGet("verify")]
+        public async Task<IActionResult> VerifyUser()
+        {
+            string token = Request.Headers.Authorization;
+
+            if (!token.Contains("Bearer"))
+            {
+                return Conflict("No token provided");
+            }
+
+            string[] parsedToken = token.Split(" ");
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var decodedToken = tokenHandler.ReadToken(parsedToken[1]);
+            return Ok(parsedToken[1]);
         }
     }
 }
