@@ -75,17 +75,17 @@ namespace AuthProvider.Controllers
         )
         {
             var query = new QueryBuilder();
-            query.Add("client_id", client_id);
-            query.Add("response_type", response_type);
+            // query.Add("client_id", client_id);
+            // query.Add("response_type", response_type);
             query.Add("redirect_uri", redirect_uri);
             query.Add("state", state);
+            // query.Add("scope", scope);
 
             return Ok(query.ToString());
         }
 
         [HttpPost]
         public IActionResult Authorize(
-            User user,
             string redirect_uri,
             string state
         )
@@ -132,10 +132,7 @@ namespace AuthProvider.Controllers
             {
                 access_token,
                 token_type = "Bearer",
-                raw_claim = "oauthClient",
-                email = "test@email.com",
-                sub = "1",
-                name = "Vladyslav",
+                raw_claim = "oauthClient"
             };
             
             return new OkObjectResult(responseObject);
