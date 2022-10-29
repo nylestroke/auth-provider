@@ -31,18 +31,31 @@ const LoginPage = () => {
                 username: values.login,
                 password: values.password
             }
-            
-            // axios.get("/api/oauth2/token").then(data => console.log(data));
 
-            axios.post("/api/oauth2/user/login", data).then((res) => {
-                if (res.status === 200) {
-                    axios.get("/api/oauth2" + query).then((resGet) => {
-                        axios.post("/api/oauth2" + resGet.data).then((resPost) => {
-                            window.location.assign(resPost.data);
-                        });
-                    });
-                }
+            axios.post(`/api/oauth2/code${query}`, data).then((res) => {
+                window.location.assign(res.data);
             });
+            
+            // axios.post("/api/oauth2/token?grant_type=authorization_code&code=" +"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzU3YzU1NGEzNTYwNmE5Y2UxZTVlZGMiLCJuYmYiOjE2NjY5NTMwMDQsImV4cCI6MTY2Njk1MzA2NCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwLyIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC8ifQ.YAGoSGWqkQNqyiEFZCjRjYNq9rvKqwG10iVdSDKz7t4").then(res => {
+            //     const config = {
+            //         headers: {
+            //             Authorization: "Bearer " + res.data, 
+            //         }
+            //     }
+            //     axios.get("/api/oauth2/userinfo", config).then(data => {
+            //         console.log(data);
+            //     })
+            // });
+
+            // axios.post("/api/oauth2/user/login", data).then((res) => {
+            //     if (res.status === 200) {
+            //         axios.get("/api/oauth2" + query).then((resGet) => {
+            //             axios.post("/api/oauth2" + resGet.data).then((resPost) => {
+            //                 window.location.assign(resPost.data);
+            //             });
+            //         });
+            //     }
+            // });
 
             // axios.post("/api/oauth2/token" + "?grant_type=authorization_code&code=authorized").then(token => {
             //     const config = {

@@ -67,36 +67,94 @@ namespace AuthProvider.Controllers
             };
         }
 
-        [HttpGet]
-        public IActionResult Authorize(
-            string response_type,
-            string client_id,
+        // [HttpGet]
+        // public IActionResult Authorize(
+        //     string response_type,
+        //     string client_id,
+        //     string redirect_uri,
+        //     string scope,
+        //     string state
+        // )
+        // {
+        //     var query = new QueryBuilder();
+        //     query.Add("client_id", client_id);
+        //     query.Add("response_type", response_type);
+        //     query.Add("redirect_uri", redirect_uri);
+        //     query.Add("state", state);
+        //     query.Add("scope", scope);
+        //     return Ok(query.ToString());
+        // }
+
+        [HttpPost("code")]
+        [HttpGet("code")]
+        public async Task<IActionResult> Code(
             string redirect_uri,
-            string scope,
-            string state
+            string state,
+            User user
         )
         {
             var query = new QueryBuilder();
-            // query.Add("client_id", client_id);
-            // query.Add("response_type", response_type);
-            query.Add("redirect_uri", redirect_uri);
             query.Add("state", state);
-            // query.Add("scope", scope);
-            return Ok(query.ToString());
+            
+            if (user.email == null && user.username == null)
+            {
+                return NotFound("Please enter email or username. User not found");
+            }
+
+            var userModel = await _usersService.GetUser(user.email, user.username);
+            if (userModel == null)
+            {
+                return NotFound("User not found with current credentials");
+            }
+
+            var checkPassword = BC.Verify(user.password, userModel?.password);
+            if (checkPassword)
+            {
+                var claims = new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, userModel!.id),
+                };
+
+                var secretBytes = Encoding.UTF8.GetBytes(_secret);
+                var key = new SymmetricSecurityKey(secretBytes);
+                const string algorithm = SecurityAlgorithms.HmacSha256;
+
+                var signingCredentials = new SigningCredentials(key, algorithm);
+
+                var token = new JwtSecurityToken(
+                    _issuer,
+                    _issuer,
+                    claims,
+                    notBefore: DateTime.Now,
+                    expires: DateTime.Now.AddMinutes(1),
+                    signingCredentials);
+
+                var authorization_token = new JwtSecurityTokenHandler().WriteToken(token);
+
+                query.Add("code", authorization_token);
+
+                return Ok(redirect_uri + query.ToString());
+            }
+
+            return Conflict("Incorrect credentials");
         }
 
-        [HttpPost]
-        public IActionResult Authorize(
-            string redirect_uri,
-            string state
-        )
-        {
-            var query = new QueryBuilder();
-            query.Add("code", "authorized");
-            query.Add("state", state);
-
-            return Ok($"{redirect_uri}{query.ToString()}");
-        }
+        // [HttpPost]
+        // [HttpGet]
+        // public IActionResult Authorize(
+        //     string redirect_uri,
+        //     string state
+        // )
+        // {
+        //     var query = new QueryBuilder();
+        //     
+        //     var user = PostUser()
+        //     
+        //     query.Add("code", "authorized");
+        //     query.Add("state", state);
+        //
+        //     return Ok($"{redirect_uri}{query.ToString()}");
+        // }
 
         [HttpPost("token")]
         public async Task<IActionResult> Token(
@@ -104,52 +162,25 @@ namespace AuthProvider.Controllers
             string code
         )
         {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, "mainWeb"),
-            };
 
-            var secretBytes = Encoding.UTF8.GetBytes(_secret);
-            var key = new SymmetricSecurityKey(secretBytes);
-            const string algorithm = SecurityAlgorithms.HmacSha256;
-
-            var signingCredentials = new SigningCredentials(key, algorithm);
-
-            var token = new JwtSecurityToken(
-                _issuer,
-                _issuer,
-                claims,
-                notBefore: DateTime.Now,
-                expires: DateTime.Now.AddDays(30),
-                signingCredentials);
-
-            var access_token = new JwtSecurityTokenHandler().WriteToken(token);
-
-            var responseObject = new
-            {
-                access_token,
-                token_type = "Bearer",
-                raw_claim = "oauthClient"
-            };
-
-            return new OkObjectResult(responseObject);
+            return new OkObjectResult(code);
         }
 
-        [HttpGet("verify")]
-        public async Task<IActionResult> VerifyUser()
+        [HttpGet("userinfo")]
+        public async Task<IActionResult> UserInfo()
         {
-            string token = Request.Headers.Authorization;
+            string headers = Request.Headers.Authorization;
+            var headerToken = headers.Split(" ");
+            var token = headerToken[1];
 
-            if (!token.Contains("Bearer"))
+            if (!headers.Contains("Bearer"))
             {
-                return Conflict("No token provided");
+                return BadRequest("No bearer token found");
             }
 
-            string[] parsedToken = token.Split(" ");
-            
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var decodedToken = tokenHandler.ReadToken(parsedToken[1]);
-            return Ok(parsedToken[1]);
+            var jwt = new JwtSecurityTokenHandler();
+            var parsedToken = jwt.ReadToken(token);
+            return Ok(parsedToken);
         }
     }
 }
