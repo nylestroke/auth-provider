@@ -1,10 +1,9 @@
 ﻿using AuthProvider.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace AuthProvider.Services;
-
-using MongoDB.Driver;
 
 public class UserService
 {
@@ -24,20 +23,19 @@ public class UserService
         if (email != null && username == null)
         {
             return await _usersCollection.Find(x => x.email == email).FirstOrDefaultAsync();
-
         }
         else if (email == null && username != null)
         {
-            return await _usersCollection.Find(x => x.username == username).FirstOrDefaultAsync();   
+            return await _usersCollection.Find(x => x.username == username).FirstOrDefaultAsync();
         }
 
-        return null;
+        return await _usersCollection.Find(x => x.email == email).FirstOrDefaultAsync();
     }
-    
+
     public async Task<User?> GetAsync(string id)
     {
         return await _usersCollection.Find(x => x.id == id).FirstOrDefaultAsync();
-        }
+    }
 
     public async Task CreateAsync(User newUser) =>
         await _usersCollection.InsertOneAsync(newUser);
@@ -45,6 +43,14 @@ public class UserService
     public async Task UpdateAsync(string id, User updateUser) =>
         await _usersCollection.ReplaceOneAsync(x => x.id == id, updateUser);
 
-    public async Task RemoveAsync(string id) =>
-        await _usersCollection.DeleteOneAsync(x => x.id == id);
+    public async Task<User?> GetUserByCode(string code) =>
+        await _usersCollection.Find(x => x.code == code).FirstOrDefaultAsync();
+
+    public async Task RemoveCode(string code)
+    {
+        var user = await _usersCollection.Find(x => x.code == code).FirstOrDefaultAsync();
+        user.code = null;
+        
+        await _usersCollection.ReplaceOneAsync(x => x.id == user.id, user);
+    }
 }
