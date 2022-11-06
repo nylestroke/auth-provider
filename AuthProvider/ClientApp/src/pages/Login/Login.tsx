@@ -16,7 +16,8 @@ const LoginPage = () => {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors: isValid },
+		formState: { errors, isValid },
+		setError,
 	} = useForm({
 		defaultValues: {
 			login: "",
@@ -38,13 +39,22 @@ const LoginPage = () => {
 						password: values.password,
 				  });
 
-			axios.post("/api/v2/credentials", data).then(codeRes => {
-				axios
-					.post(`/api/v2/authorize${query}&code=${codeRes.data.code}`)
-					.then(res => {
-						window.location.assign(res.data);
+			axios
+				.post("/api/v2/credentials", data)
+				.then(codeRes => {
+					axios
+						.post(`/api/v2/authorize${query}&code=${codeRes.data.code}`)
+						.then(res => {
+							window.location.assign(res.data);
+						});
+				})
+				.catch(err => {
+					setError("login", { type: "error", message: " " });
+					setError("password", {
+						type: "error",
+						message: "Incorrect login or password",
 					});
-			});
+				});
 		}
 	};
 
@@ -54,7 +64,11 @@ const LoginPage = () => {
 				<div className="form">
 					<div className="header">Sign in to your account</div>
 					<form onSubmit={handleSubmit(onSubmit)}>
-						<div className="input_block">
+						<div
+							className={`input_block ${
+								errors.login?.message ? "errored" : null
+							}`}
+						>
 							<input
 								type="text"
 								autoComplete="email"
@@ -63,8 +77,15 @@ const LoginPage = () => {
 									required: "Username or email required",
 								})}
 							/>
+							{errors.login?.message ? (
+								<span className="error_msg">{errors.login?.message}</span>
+							) : null}
 						</div>
-						<div className="input_block">
+						<div
+							className={`input_block ${
+								errors.password?.message ? "errored" : null
+							}`}
+						>
 							<input
 								type={visibility ? "text" : "password"}
 								placeholder="Password"
@@ -76,6 +97,9 @@ const LoginPage = () => {
 									},
 								})}
 							/>
+							{errors.password?.message ? (
+								<span className="error_msg">{errors.password?.message}</span>
+							) : null}
 							<button
 								type="button"
 								className="visibility"

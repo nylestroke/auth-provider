@@ -22,13 +22,41 @@
 		// padding-left: 120px;
 		// padding-right: 120px;
 
+		.errored {
+			input {
+				color: #f35b5bff !important;
+				border-bottom-color: #f35b5bff !important;
+			}
+
+			::placeholder {
+				color: rgba(#f35b5bff, 0.9) !important;
+			}
+
+			:-ms-input-placeholder {
+				color: rgba(#f35b5bff, 0.9) !important;
+			}
+
+			::-ms-input-placeholder {
+				color: rgba(#f35b5bff, 0.9) !important;
+			}
+		}
+
 		.input_block {
 			position: relative;
 			display: flex;
+			flex-direction: column;
 			justify-content: center;
 			margin: 0 auto;
 			width: 100%;
 			max-width: calc(100% - 320px);
+
+			.error_msg {
+				font-size: 14px;
+				display: flex;
+				width: 100%;
+				padding-top: 6px;
+				color: #f35b5bff;
+			}
 
 			input {
 				display: flex;

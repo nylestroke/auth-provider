@@ -1,7 +1,8 @@
 ﻿using AuthProvider.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using PostmarkDotNet;
+using PostmarkDotNet.Legacy;
 
 namespace AuthProvider.Services;
 
@@ -62,7 +63,22 @@ public class UserService
         var user = await GetAsync(id);
         user!.recoverToken = token;
         await _usersCollection.ReplaceOneAsync(x => x.id == user.id, user);
-        return token;
+
+        PostmarkMessage message = new PostmarkMessage
+        {
+            From = "support@enqluence.com",
+            To = user.email,
+            Subject = "Password recovery",
+            HtmlBody = $"<a href='http://localhost:44405/recover?token={token}'> Click here to change your password </a>",
+            TextBody = "Change password link",
+            ReplyTo = "reply@enqluence.com",
+            TrackOpens = true, 
+        };
+
+        PostmarkClient client = new PostmarkClient("6f7f003d-a4d0-47ba-80e8-12bf7b8defff");
+        PostmarkResponse response = client.SendMessage(message);
+
+        return response.Message.ToString();
     }
     
     public async Task<string> ChangePasswordFromRecoverToken(User credentials, string token)

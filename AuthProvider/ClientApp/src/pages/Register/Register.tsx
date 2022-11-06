@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./../Login/Form.scss";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -16,7 +16,7 @@ const RegisterPage = () => {
 		register,
 		handleSubmit,
 		setError,
-		formState: { errors: isValid },
+		formState: { errors, isValid },
 	} = useForm({
 		defaultValues: {
 			username: "",
@@ -46,13 +46,24 @@ const RegisterPage = () => {
 			password: values.password,
 		};
 
-		axios.post("/api/v2/credentials", data).then(codeRes => {
-			axios
-				.post(`/api/v2/authorize${query}&code=${codeRes.data.code}`)
-				.then(res => {
-					window.location.assign(res.data);
+		axios
+			.post("/api/v2/credentials", data)
+			.then(codeRes => {
+				axios
+					.post(`/api/v2/authorize${query}&code=${codeRes.data.code}`)
+					.then(res => {
+						window.location.assign(res.data);
+					});
+			})
+			.catch(err => {
+				setError("username", { type: "error", message: " " });
+				setError("email", { type: "error", message: " " });
+				setError("password", { type: "error", message: " " });
+				setError("cpassword", {
+					type: "error",
+					message: "Something went wrong. Please try again",
 				});
-		});
+			});
 	};
 
 	return (
@@ -61,7 +72,11 @@ const RegisterPage = () => {
 				<div className="form">
 					<div className="header">Sign up new account</div>
 					<form onSubmit={handleSubmit(onSubmit)}>
-						<div className="input_block">
+						<div
+							className={`input_block ${
+								errors.username?.message ? "errored" : null
+							}`}
+						>
 							<input
 								type="text"
 								placeholder="Username"
@@ -69,8 +84,15 @@ const RegisterPage = () => {
 									required: "Username required",
 								})}
 							/>
+							{errors.username?.message ? (
+								<span className="error_msg">{errors.username?.message}</span>
+							) : null}
 						</div>
-						<div className="input_block">
+						<div
+							className={`input_block ${
+								errors.email?.message ? "errored" : null
+							}`}
+						>
 							<input
 								type="email"
 								placeholder="Your email"
@@ -78,8 +100,15 @@ const RegisterPage = () => {
 									required: "Email required",
 								})}
 							/>
+							{errors.email?.message ? (
+								<span className="error_msg">{errors.email?.message}</span>
+							) : null}
 						</div>
-						<div className="input_block">
+						<div
+							className={`input_block ${
+								errors.password?.message ? "errored" : null
+							}`}
+						>
 							<input
 								type={visibility ? "text" : "password"}
 								placeholder="Password"
@@ -91,6 +120,9 @@ const RegisterPage = () => {
 									},
 								})}
 							/>
+							{errors.password?.message ? (
+								<span className="error_msg">{errors.password?.message}</span>
+							) : null}
 							<button
 								type="button"
 								className="visibility"
@@ -100,7 +132,11 @@ const RegisterPage = () => {
 								{visibility ? <VisibilityOffIcon /> : <VisibilityIcon />}
 							</button>
 						</div>
-						<div className="input_block">
+						<div
+							className={`input_block ${
+								errors.cpassword?.message ? "errored" : null
+							}`}
+						>
 							<input
 								type={visibility ? "text" : "password"}
 								placeholder="Confirm password"
@@ -112,6 +148,9 @@ const RegisterPage = () => {
 									},
 								})}
 							/>
+							{errors.cpassword?.message ? (
+								<span className="error_msg">{errors.cpassword?.message}</span>
+							) : null}
 						</div>
 						<div className="button_block">
 							<button type="submit">Sign Up</button>
