@@ -130,4 +130,29 @@ public class OAuth2Service
             email = information.email
         };
     }
+
+    public async Task<User> GetUserByRecoverToken(string token)
+    {
+        return await _usersService.GetUserByRecoverToken(token);
+    }
+
+    public async Task<string> RecoverUser(string? username, string? email)
+    {
+        if (username is null && email is null)
+        {
+            throw new Exception("No user information");
+        }
+        
+        var user = await _usersService.GetUser(email, username);
+        if (user?.id is null) throw new Exception("No user found with this credentials");
+
+        var recoverToken = GenerateCode(32).ToLower();
+        return await _usersService.GetRecoverToken(user!.id, recoverToken);
+    }
+
+    public async Task<string> RecoverUserAndChangePassword(User user, string token)
+    {
+        user.password = BC.HashPassword(user.password);
+        return await _usersService.ChangePasswordFromRecoverToken(user, token);
+    }
 }

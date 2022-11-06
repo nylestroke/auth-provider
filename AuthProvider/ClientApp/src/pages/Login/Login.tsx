@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "../../axios";
-import "./Login.scss";
+import "./Form.scss";
 
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -101,7 +101,7 @@ const LoginPage = () => {
 						<div className="link_block">
 							<div>
 								Forgot your password?
-								<span onClick={() => navigate("/change-password")}>
+								<span onClick={() => navigate("/recover")}>
 									Change password
 								</span>
 							</div>

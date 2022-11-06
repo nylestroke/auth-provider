@@ -71,5 +71,23 @@ namespace AuthProvider.Controllers
             string headers = Request.Headers.Authorization;
             return _oauthService.GetUserInformation(headers);
         }
+
+        [AllowAnonymous]
+        [HttpPost("recover/token")]
+        [Consumes("application/json")]
+        public async Task<string> Recover([FromBody] Recover credentials)
+        {
+            return await _oauthService.RecoverUser(credentials.username, credentials.email);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("recover/password")]
+        [Consumes("application/json")]
+        public async Task<string> RecoverUserAndChangePassword([FromBody] Recover credentials)
+        {
+            var user = await _oauthService.GetUserByRecoverToken(credentials.token);
+            user.password = credentials!.password;
+            return await _oauthService.RecoverUserAndChangePassword(user, credentials.token);
+        }
     }
 }

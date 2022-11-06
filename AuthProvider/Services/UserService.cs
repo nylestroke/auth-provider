@@ -53,4 +53,24 @@ public class UserService
         
         await _usersCollection.ReplaceOneAsync(x => x.id == user.id, user);
     }
+
+    public async Task<User> GetUserByRecoverToken(string token) =>
+        await _usersCollection.Find(x => x.recoverToken == token).FirstOrDefaultAsync();
+
+    public async Task<string> GetRecoverToken(string id, string token)
+    {
+        var user = await GetAsync(id);
+        user!.recoverToken = token;
+        await _usersCollection.ReplaceOneAsync(x => x.id == user.id, user);
+        return token;
+    }
+    
+    public async Task<string> ChangePasswordFromRecoverToken(User credentials, string token)
+    {
+        var user = await GetAsync(credentials!.id);
+        if (user.recoverToken != token) throw new Exception("Invalid recover token");
+        credentials.recoverToken = null;
+        await _usersCollection.ReplaceOneAsync(x => x.id == credentials.id, credentials);
+        return "Password changed. Token removed";
+    }
 }

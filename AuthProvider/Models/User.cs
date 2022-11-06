@@ -18,4 +18,7 @@ public class User
     
     [BsonIgnoreIfNull]
     public string? code { get; set; }
+    
+    [BsonIgnoreIfNull]
+    public string? recoverToken { get; set; }
 }
