@@ -1,26 +1,32 @@
-﻿@import './../../shared/styles/variables';
+﻿@import "./../../shared/styles/variables";
 
 .border {
-  height: 2px;
-  background: linear-gradient(90deg,transparent, #6365f1 40%, #7b7ce7 60%,transparent);
-  box-sizing: border-box;
-  width: 100%;
-  margin-bottom: 36px;
+	height: 2px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		#6365f1 40%,
+		#7b7ce7 60%,
+		transparent
+	);
+	box-sizing: border-box;
+	width: 100%;
+	margin-bottom: 36px;
 }
 
 footer {
-  margin-top: -200px;
-  position: relative;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  
-  .copyright {
-    font-size: 2vmin;
-    font-family: $font-family-second!important;
-    font-weight: 500;
-    color: $text-color;
-  }
+	margin-top: -200px;
+	position: relative;
+	width: 100%;
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+
+	.copyright {
+		font-size: 2vmin;
+		font-family: $font-family-second !important;
+		font-weight: 500;
+		color: $text-color;
+	}
 }

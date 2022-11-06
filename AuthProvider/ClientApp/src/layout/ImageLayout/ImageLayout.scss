@@ -1,0 +1,27 @@
+.image-layout {
+	width: 100%;
+	position: relative;
+	&:before {
+		position: absolute;
+		top: 0;
+		right: 0;
+		left: 0;
+		bottom: 0;
+		content: "";
+		background: #1b1b1ba2;
+		z-index: 5;
+		width: 100%;
+		height: 100vh;
+	}
+	img {
+		width: 100%;
+		height: 100vh;
+	}
+}
+
+@media screen and (max-width: 920px) {
+	.image-layout {
+		position: absolute;
+		z-index: 0;
+	}
+}

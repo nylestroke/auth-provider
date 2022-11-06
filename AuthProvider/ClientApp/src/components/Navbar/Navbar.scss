@@ -1,11 +1,12 @@
 ﻿nav {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-  .logo {
-    img {
-      width: 100px;
-    }
-  }
+	display: none;
+	justify-content: center;
+	align-items: center;
+	margin-top: 1em;
+
+	.logo {
+		img {
+			width: 100px;
+		}
+	}
 }
