@@ -44,8 +44,7 @@ namespace AuthProvider.Controllers
                 return await _oauthService.CreateUser(credentials);
             }
 
-            return await _oauthService.AuthorizeUser(credentials) ??
-                   throw new Exception("Cannot find exist user with current credentials");
+            return await _oauthService.AuthorizeUser(credentials);
         }
 
         [AllowAnonymous]

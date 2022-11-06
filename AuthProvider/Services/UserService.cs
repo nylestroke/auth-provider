@@ -1,4 +1,6 @@
-﻿using AuthProvider.Models;
+﻿using System.Web;
+using AuthProvider.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using PostmarkDotNet;
